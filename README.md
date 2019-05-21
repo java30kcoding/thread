@@ -1,6 +1,6 @@
 # Java运行原理
 
-[gh-md-toc]
+gh-md-toc
 
 ## JVM划分
 
