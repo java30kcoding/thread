@@ -1,5 +1,6 @@
 # Java运行原理
 
+
 ## JVM划分
 
 **JVM运行时数据区**：
@@ -50,7 +51,7 @@
 
 ## 运行图
 
-![1](C:\Users\yuanyulou\Desktop\博客图片\Java运行\1.png)
+![1](http://prvyof0n9.bkt.clouddn.com/1.png)
 
 ------
 
@@ -74,7 +75,7 @@
 
 ## 线程切换状态图
 
-![2](C:\Users\yuanyulou\Desktop\博客图片\Java运行\2.png)
+![2](http://prvyof0n9.bkt.clouddn.com/2.png)
 
 ------
 
@@ -108,7 +109,7 @@
 
 ## CPU的优化手段-缓存
 
-![3](C:\Users\yuanyulou\Desktop\博客图片\Java运行\3.png)
+![3](http://prvyof0n9.bkt.clouddn.com/3.png)
 
 - L1 一级缓存是CPU第一层高速缓存，分为数据缓存和指令缓存。一般服务器CPU的L1缓存容量通常在32 - 4096KB。
 
@@ -138,7 +139,7 @@
 
 ## 运行时指令重排
 
-![4](C:\Users\yuanyulou\Desktop\博客图片\Java运行\4.png)
+![4](http://prvyof0n9.bkt.clouddn.com/4.png)
 
 **指令重拍场景**：当CPU写缓存时发现缓存区块正在被其他CPU占用，为了提高CPU处理性能，可能将后面的读缓存命令优先执行。
 
