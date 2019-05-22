@@ -1,7 +1,7 @@
 package cn.itlou.thread;
 
 /**
- *
+ * 线程状态
  */
 public class Demo01 {
 
@@ -11,12 +11,9 @@ public class Demo01 {
     public static void main(String[] args) throws InterruptedException {
         //第一种状态->新建->运行->终止
         System.out.println("************第一种状态->新建->运行->终止***********************************");
-        Thread thread1 = new Thread(new Runnable() {
-            @Override
-            public void run() {
+        Thread thread1 = new Thread(() -> {
                 System.out.println("thread1当前状态：" + Thread.currentThread().getState().toString());
                 System.out.println("thread1执行了！");
-            }
         });
         System.out.println("没有调用start方法，thread1当前状态：" + thread1.getState().toString());
         thread1.start();
@@ -27,9 +24,7 @@ public class Demo01 {
 
         //第二种状态->新建->运行->终止
         System.out.println("************第二种状态->新建->运行->等待->运行->终止(sleep方式)************");
-        Thread thread2 = new Thread(new Runnable() {
-            @Override
-            public void run() {
+        Thread thread2 = new Thread(() -> {
                 try{//让thread2进入等待状态
                     Thread.sleep(2000L);
                 }catch (InterruptedException e){
@@ -37,7 +32,6 @@ public class Demo01 {
                 }
                 System.out.println("thread2当前状态：" + Thread.currentThread().getState().toString());
                 System.out.println("thread2执行了！");
-            }
         });
         System.out.println("没有调用start方法，thread2当前状态：" + thread2.getState().toString());
         thread2.start();
@@ -50,14 +44,12 @@ public class Demo01 {
 
         //第三种状态->新建->运行->终止
         System.out.println("************第三种状态->新建->运行->阻塞->运行->终止(sleep方式)************");
-        Thread thread3 = new Thread(new Runnable() {
-            @Override
-            public void run() {
+        Thread thread3 = new Thread(() -> {
                 synchronized (Demo01.class){
                     System.out.println("thread2当前状态：" + Thread.currentThread().getState().toString());
                     System.out.println("thread2执行了！");
                 }
-            }
+
         });
         synchronized (Demo01.class){
             System.out.println("没有调用start方法，thread3当前状态：" + thread3.getState().toString());
