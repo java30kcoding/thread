@@ -1,5 +1,6 @@
 # Java运行原理
 
+
 ## JVM划分
 
 **JVM运行时数据区**：
@@ -260,5 +261,191 @@ ThreadLocal<T> var = new ThreadLoacl<T>();
 
 ​	它们位于执行线程的栈中，其他线程无法访问这个栈。
 
-# 线程池
+# 线程池应用及原理
+
+## 为什么要用线程池
+
+​	线程是不是越多越好？
+
+​	1.线程在java中是一个对象，更是操作系统的资源，线程创建、销毁需要时间。如果创建时 + 销毁时间 > 执行任务时间就很不划算。
+
+​	2.java对象占用堆内存，操作系统线程占用系统内存，根据jvm规范，一个线程默认栈大小为1M，这个栈空间是需要从系统内存中分配的。线程过多会消耗很多内存。
+
+​	3.操作系统在多线程状态下需要频繁切换线程上下文。
+
+## 线程池的基本概念
+
+​	1.`线程池管理器`：用于创建并管理线程池，包括创建线程池，销毁线程池，添加新任务。
+
+​	2.`工作线程`：线程池中线程，在没有任务时处于等待状态，可以循环的执行任务。
+
+​	3.`任务接口`：每个任务必须实现的接口，以提供线程调度任务的执行，它主要规定了任务的入口，任务执行完后的收尾工作，任务的执行状态等。
+
+​	4.`任务队列`：用于存放没有处理的任务。提供一种缓冲机制。
+
+![](http://prvyof0n9.bkt.clouddn.com/8.png)
+
+## 线程池API - 接口定义和实现类
+
+| 类型   | 名称                        | 描述                                                         |
+| ------ | --------------------------- | ------------------------------------------------------------ |
+| 接口   | Executor                    | 最上层的接口定义了执行的方法Execute                          |
+| 接口   | ExecutorService             | 继承Executor接口，拓展了Callable、Future、关闭方法           |
+| 接口   | ScheduleExecutorService     | 继承了ExecutorService，增加了定时任务的相关方法              |
+| 实现类 | **ThreadPoolExecutor**      | **基础、标准的线程实现**                                     |
+| 实现类 | ScheduledThreadPoolExecutor | 继承了ThreadPoolExecutor，实现了ScheduleExecutorService中相关的定时任务方法 |
+
+## 线程池API - 方法定义
+
+<center>ExecutorServcie</center>
+
+```java
+//检测ExecutorService是否已经关闭，直到所有任务完成执行，或超市发生，或当前线程被中断
+awaitTermination(long timeout, TimeUtnit unit)
+//执行给定的任务集合，执行完毕后，返回结果
+invokeAll(Collection<? extends Callable<T>> tasks)
+//执行给定的任务集合，执行完毕或者超时后，返回结果，其他任务终止
+invokeAll(Collection<? extends Callabl<T>> tasks, long timeout, TimeUnit unit)
+//执行给定的任务，任意一个执行成功则返回结果，其他任务结束
+invokeAny(Collection<? extends Callable<T>> tasks)
+//执行给定的任务，任意一个执行成功或者超时后，则返回结果，其他任务终止
+invokeAny(Collection<? extends Callabl<T>> tasks, long timeout, TimeUnit unit)
+//如果此线程池已关闭，则返回true
+isShutdown()
+//如果关闭后所有任务都已完成，则返回true
+isTerminated()
+//优雅关闭线程池，之前提交的任务将被执行，但是不会接受新的任务
+shutdown()
+//尝试停止所有正在执行的任务，停止等待任务的处理，并返回等待执行任务的列表
+shutdownNow()
+//提交一个用于执行的Callable返回任务，并返回一个Future，用于获取Callable执行结果
+submit(Callable<T> task)
+//提交可运行任务以执行，并发回一个Future对象，执行结果为null
+submit(Runnalbe task)
+//提交可运行任务以执行，并返回Future，执行结果为传入的result
+submit(Runnable task, T result)
+
+```
+
+<center>ScheduleExecutorService</center>
+
+```java
+//创建并执行一个一次性任务，过了延迟时间就会被执行
+schedule(Callable<V> callable, long delay, TimeUnit unit)
+//同上
+schedule(Runnable command, long delay, TimeUnit unti)
+//创建并执行一个周期任务
+//过了给定的初始延迟时间，会被第一次执行
+//执行过程中发生异常，则任务停止
+//一次任务执行时间超过了周期时间，下一次任务会等到该次任务执行结束后，立即执行
+//这也是它和scheduleWithFixedDelay的区别
+scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit)
+//创建并执行一个周期任务
+//过了初始延迟时间，第一次被执行，后续以给定的周期时间执行
+//执行过程中发生异常，则任务停止
+//一次任务执行时长超过了周期时间，下次任务会在该次任务执行结束的时间基础上
+//再计算执行延时(任务结束的时间点 + 延时时间)
+scheduleWithFixedDelay(Runnable command, long initialDelay, long period, TimeUnit unit)
+```
+
+## 线程池API - Executors工具类
+
+<center>常用方法</center>
+
+```java
+//创建一个固定大小、任务队列容量无界的线程池。核心数量=最大线程数
+newFixedThreadPool(int nThreads)
+//创建一个大小无界的缓冲线程池。它的任务队列是一个同步队列
+//任务加入到池中如果有空闲线程，则用空闲线程执行，如果没有则创建新的线程执行
+//池中的线程空闲超过60秒会自动销毁释放，线程数随任务变化。适用于执行耗时较小的异步任务
+//核心线程数=0，最大线程数=Integer.MAX_VALUE
+newCachedThreadPool()
+//只有一个线程来执行无界队列任务的单一线程池
+//该池保证任务的执行顺序，当唯一的线程因任务异常中止时
+//创建一个新的线程来继续执行后续任务
+//与newFixedThreadPool(1)的区别在于不能再改变
+newSingleThreadExector()
+//能定时执行任务的线程池。核心数量由参数指定，最大数量=Integer.MAX_VALUE
+newScheduledThreadPool(int corePoolSize)
+```
+
+## 线程池的用法
+
+​	代码：Demo08
+
+## 线程池原理 - 任务execute过程
+
+​	1.是否达到核心线程数量？没有，创建一个工作线程执行任务。
+
+​	2.工作队列是否已经满了？没有，将新任务提交到队列中。
+
+​	3.是否达到线程池最大数量？没有，创建一个新的工作线程执行任务
+
+​	4.最后，执行拒绝策略来处理多出的任务。
+
+![](http://prvyof0n9.bkt.clouddn.com/9.png)
+
+​	线程池execute源码：
+
+```java
+int c = ctl.get();
+        if (workerCountOf(c) < corePoolSize) {
+            if (addWorker(command, true))
+                return;
+            c = ctl.get();
+        }
+        if (isRunning(c) && workQueue.offer(command)) {
+            int recheck = ctl.get();
+            if (! isRunning(recheck) && remove(command))
+                reject(command);
+            else if (workerCountOf(recheck) == 0)
+                addWorker(null, false);
+        }
+        else if (!addWorker(command, false))
+            reject(command);
+```
+
+## 线程数量
+
+​	如何确定合适数量的线程？
+
+​	计算性任务：cpu数量的1-2倍。
+
+​	IO型任务：相比计算型任务，需要多一些，根据具体的**IO阻塞时长**进行考量决定。如tomcat中默认的最大线程数为：200。
+
+​	也可以考虑根据需要在一个**最小数量和最大数量**间自动增减线程数。
+
+​	通过查看CPU利用率去调整线程数量，大概达到80%就可以。
+
+# 线程安全
+
+## 可见性
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
