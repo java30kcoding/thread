@@ -24,17 +24,17 @@ public class LockDemo02 {
     }
 
     public static void main(String[] args) throws Exception {
-        LockDemo01 lockDemo01 = new LockDemo01();
+        LockDemo02 lockDemo02 = new LockDemo02();
 
         for (int i = 0; i < 2; i++) {
             new Thread(() -> {
                 for (int j = 0; j < 10000; j++) {
-                    lockDemo01.add();
+                    lockDemo02.add();
                 }
             }).start();
         }
         Thread.sleep(2000L);
-        System.out.println(lockDemo01.i);
+        System.out.println(lockDemo02.i);
     }
 
 }
