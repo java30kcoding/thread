@@ -1,5 +1,7 @@
 package cn.itlou.lock;
 
+import cn.itlou.mylock.LouLock;
+
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -10,7 +12,7 @@ public class LockDemo02 {
 
     volatile int i = 0;
 
-    Lock lock = new ReentrantLock();
+    Lock lock = new LouLock();
 
     public void add(){
 
