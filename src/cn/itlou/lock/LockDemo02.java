@@ -13,6 +13,7 @@ public class LockDemo02 {
     volatile int i = 0;
 
     Lock lock = new LouLock();
+//    Lock lock = new ReentrantLock();
 
     public void add(){
 
