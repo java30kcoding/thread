@@ -20,7 +20,7 @@
 
 ## 线程切换状态图
 
-![2](http://prvyof0n9.bkt.clouddn.com/2.png)
+![2](http://img.shaking.top/2.png)
 
 ------
 
@@ -54,7 +54,7 @@
 
 ## CPU的优化手段-缓存
 
-![3](http://prvyof0n9.bkt.clouddn.com/3.png)
+![3](http://img.shaking.top/3.png)
 
 - L1 一级缓存是CPU第一层高速缓存，分为数据缓存和指令缓存。一般服务器CPU的L1缓存容量通常在32 - 4096KB。
 
@@ -84,7 +84,7 @@
 
 ## 运行时指令重排
 
-![4](http://prvyof0n9.bkt.clouddn.com/4.png)
+![4](http://img.shaking.top/4.png)
 
 ​	**指令重拍场景**：当CPU写缓存时发现缓存区块正在被其他CPU占用，为了提高CPU处理性能，可能将后面的读缓存命令优先执行。
 
@@ -118,7 +118,7 @@
 
 - 文件共享
 
-  ![](http://prvyof0n9.bkt.clouddn.com/5.png)
+  ![](http://img.shaking.top/5.png)
 
   代码：Demo04
 
@@ -126,7 +126,7 @@
 
 - 共享变量
 
-  ![](http://prvyof0n9.bkt.clouddn.com/6.png)
+  ![](http://img.shaking.top/6.png)
 
   代码：Demo05
 
@@ -136,7 +136,7 @@
 
 示例：线程1去买包子，没包子则不执行。线程2生产包子，通知线程1继续执行。
 
-![](http://prvyof0n9.bkt.clouddn.com/7.png)
+![](http://img.shaking.top/7.png)
 
 ​	
 
@@ -228,7 +228,7 @@ ThreadLocal<T> var = new ThreadLoacl<T>();
 
 ​	4.`任务队列`：用于存放没有处理的任务。提供一种缓冲机制。
 
-![](http://prvyof0n9.bkt.clouddn.com/8.png)
+![](http://img.shaking.top/8.png)
 
 ## 线程池API - 接口定义和实现类
 
@@ -328,7 +328,7 @@ newScheduledThreadPool(int corePoolSize)
 
 ​	4.最后，执行拒绝策略来处理多出的任务。
 
-![](http://prvyof0n9.bkt.clouddn.com/9.png)
+![](http://img.shaking.top/9.png)
 
 ​	线程池execute源码：
 
@@ -366,7 +366,7 @@ int c = ctl.get();
 
 ## Java内存模型
 
-![1](http://prvyof0n9.bkt.clouddn.com/1.png)
+![1](http://img.shaking.top/1.png)
 
 **JVM运行时数据区**：
 
@@ -483,7 +483,7 @@ int c = ctl.get();
 
 ## 工作内存缓存
 
-![](http://prvyof0n9.bkt.clouddn.com/14.png)
+![](http://img.shaking.top/14.png)
 
 ## 指令重排序导致的可见性问题
 
@@ -493,9 +493,9 @@ int c = ctl.get();
 
 ​	因为线程在多个CPU上运行，在各个CPU自己看来自己的重排序是没有问题的，但是整合到一起就可能发生问题。
 
-![](http://prvyof0n9.bkt.clouddn.com/12.png)
+![](http://img.shaking.top/12.png)
 
-![](http://prvyof0n9.bkt.clouddn.com/13.png)
+![](http://img.shaking.top/13.png)
 
 ​	Java jit编译器会把如下代码(前提是Hot Code热点代码执行次数很多)：
 
@@ -615,6 +615,7 @@ public class Demo{
         return this.value;
     }
 }
+
 ```
 
 ​	创建不可变的共享对象来保证在线程间共享时不会被修改，从而实现线程安全。
@@ -637,6 +638,7 @@ public class Demo{
         i++;
     }
 }
+
 ```
 
 ​	以上代码存在竞态条件，线程不安全，需要转变为原子操作才能安全。
@@ -720,7 +722,29 @@ public class Demo{
 
 ​	提供了对资源占用、释放，线程的等待、唤醒等等接口的具体实现。
 
+​	本质上就是封装Lock中的方法，模板方法，关键步骤由子类定义。
+
 ​	可以用在各种需要控制资源争用的场景中。(ReentrantLock/CountDownLatch/Semphore)
+
+​	AQS在临界区都利用了CAS机制。
+
+​	AQS != Lock，AQS可以实现锁，但是不等于锁，它只是实现了资源释放，资源占用的一种机制。
+
+![](http://img.shaking.top/15.png)
+
+​	acquire、acquireShared：定义了资源争用的逻辑，如果没拿到，则等待。
+
+​	**tryAcquire、tryAcquireShared：实际执行占用资源的操作，如何判定由使用者去判定。**
+
+​	release、releaseShared：定义释放资源的逻辑，释放之后，通知后续节点进行争抢。
+
+​	**tryRelease、tryReleaseShared：实际执行资源释放的操作，具体的AQS使用者去实现。**
+
+​	资源占用流程：
+
+![](http://img.shaking.top/16.png)
+
+​	代码：LouAqs
 
 ## 同步锁的本质-排队
 
@@ -729,4 +753,28 @@ public class Demo{
 - 没抢到锁的处理方式：快速尝试多次(CAS自旋锁)、阻塞等待。
 - 唤醒阻塞线程的方式(叫号器)：全部通知、通知下一个。
 
- 
+# 信号量和栅栏和倒计数器
+
+## Semaphore
+
+​	又称“`信号量`”，控制多个线程争抢许可。
+
+- acquire：获取一个许可，如果没有就等待。
+
+- release：释放一个许可。
+
+- availablePermits：方法得到可用的许可数目。
+
+  典型场景：
+
+  代码并发处理限流。`hystrix`
+
+## 啊啊啊
+
+
+
+
+
+​	
+
+​	
