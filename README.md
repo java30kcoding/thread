@@ -350,6 +350,15 @@ int c = ctl.get();
             reject(command);
 ```
 
+## 线程池拒绝策略
+
+​	当线程池的饱和策略，当阻塞队列满了，且没有空闲的工作线程，如果继续提交任务，必须采取一种策略处理该任务，线程池提供了4种策略：
+
+1. ThreadPoolExecutor.**AbortPolicy**: 丢弃任务并抛出RejectedExecutionException异常。注：**默认策略**
+2. ThreadPoolExecutor.**DiscardPolicy**：也是丢弃任务，但是不抛出异常。
+3. ThreadPoolExecutor.**DiscardOldestPolicy**：丢弃队列最前面的任务，然后重新尝试执行任务（重复此过程）
+4. ThreadPoolExecutor.**CallerRunsPolicy**：由调用线程处理该任务
+
 ## 线程数量
 
 ​	如何确定合适数量的线程？
@@ -615,7 +624,6 @@ public class Demo{
         return this.value;
     }
 }
-
 ```
 
 ​	创建不可变的共享对象来保证在线程间共享时不会被修改，从而实现线程安全。
@@ -638,7 +646,6 @@ public class Demo{
         i++;
     }
 }
-
 ```
 
 ​	以上代码存在竞态条件，线程不安全，需要转变为原子操作才能安全。
