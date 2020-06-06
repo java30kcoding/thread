@@ -3,7 +3,7 @@ package cn.itlou.thread;
 /**
  * 线程状态
  */
-public class Demo01 {
+public class ThreadState {
 
     public static Thread thread1;
     public static Demo02 obj;
@@ -45,13 +45,13 @@ public class Demo01 {
         //第三种状态->新建->运行->终止
         System.out.println("************第三种状态->新建->运行->阻塞->运行->终止(sleep方式)************");
         Thread thread3 = new Thread(() -> {
-                synchronized (Demo01.class){
+                synchronized (ThreadState.class){
                     System.out.println("thread2当前状态：" + Thread.currentThread().getState().toString());
                     System.out.println("thread2执行了！");
                 }
 
         });
-        synchronized (Demo01.class){
+        synchronized (ThreadState.class){
             System.out.println("没有调用start方法，thread3当前状态：" + thread3.getState().toString());
             thread3.start();
             System.out.println("调用start方法，thread3当前状态：" + thread3.getState().toString());
